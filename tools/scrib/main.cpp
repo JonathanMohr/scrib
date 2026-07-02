@@ -13,9 +13,11 @@ static void printHelp(const char* name, std::ostream& out)
 {
     out << "Usage: " << name << " [-h] [-v] <file> (-o <output)\n";
     out << "\nFlags:\n";
-    out << "-h/--help       Show this message\n";
-    out << "-v/--version    Show the version of this executable\n";
-    out << "-o              Specify the output file\n";
+    out << "-h/--help               Show this message\n";
+    out << "-v/--version            Show the version of this executable\n";
+    out << "-o <file>               Specify the output file\n";
+    out << "-f/--format <format>    Specify the format for the output\n";
+    out << "                        Options: markdown";
 
     out.flush();
 }
@@ -30,6 +32,8 @@ int main(int argc, const char* argv[])
 
     int outputFileIndex = 0;
     int inputFileIndex = 0;
+    const char* format = NULL; // Default
+
     for (int i = 1; i < argc; i++)
     {
         if (strcmp(argv[i], "-h") == 0 && strcmp(argv[i], "--help"))
@@ -57,6 +61,22 @@ int main(int argc, const char* argv[])
                 return 1;
             }
             outputFileIndex = i;
+        }
+
+        else if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "--format") == 0)
+        {
+            if (format != NULL)
+            {
+                std::cerr << "Error: Multiple formats specified\n";
+                return 1;
+            }
+            i++;
+            if (i >= argc)
+            {
+                std::cerr << "Error: Missing format after '-f'/'--format'\n";
+                return 1;
+            }
+            format = argv[i];
         }
 
         else
@@ -101,11 +121,21 @@ int main(int argc, const char* argv[])
     std::ofstream outputStream(output.string());
     if (!outputStream.is_open())
     {
-        std::cerr << "Error: Could not open " << output << "\n";
+        std::cerr << "Error: Could not open " << output << '\n';
         return 1;
     }
 
-    GenerateMarkdown(outputStream, document);
+    // Default
+    if (format == NULL | strcmp(format, "markdown") == 0)
+    {
+        GenerateMarkdown(outputStream, document);
+    }
+    else
+    {
+        std::cerr << "Error: Invalid format: " << format << '\n';
+        return 1;
+    }
+
     outputStream.close();
 
     return 0;
