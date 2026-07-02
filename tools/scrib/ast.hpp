@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstdint>
 #include <istream>
 #include <string>
 #include <variant>
@@ -9,7 +8,6 @@
 struct Heading
 {
     std::string text;
-    uint32_t level;
 };
 
 struct Text

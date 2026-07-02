@@ -62,9 +62,7 @@ void GenerateMarkdown(std::ostream& out, const Document& document)
 
             if constexpr (std::is_same_v<T, Heading>)
             {
-                for (uint32_t i = 0; i < n.level; i++)
-                    out << '#';
-                out << ' ';
+                out << "# ";
                 EscapeMarkdown(out, n.text);
                 out << '\n'; 
             }
