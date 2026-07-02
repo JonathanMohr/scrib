@@ -1,0 +1,2 @@
+# scrib
+Text formatting tool
