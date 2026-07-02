@@ -6,4 +6,4 @@ notheader
 
 notheader with multiple words
 
-notheader with # in \*it*it*
+notheader with # in \\\*it\*it\*

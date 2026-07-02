@@ -1,9 +1,13 @@
 #include <cstring>
+#include <fstream>
 #include <iostream>
 #include <filesystem>
 #include <optional>
 
 #include "version.h"
+#include "ast.hpp"
+
+#include "backend/markdown.hpp"
 
 static void printHelp(const char* name, std::ostream& out)
 {
@@ -75,7 +79,17 @@ int main(int argc, const char* argv[])
     const char* expectedExtension = ".txt"; // TODO: Actually set it
     std::filesystem::path input = std::filesystem::path(argv[inputFileIndex]);
 
-    // TODO: Do stuff
+    std::ifstream inputStream(input.string());
+    if (!inputStream.is_open())
+    {
+        std::cerr << "Error: Could not open " << input << "\n";
+        return 1;
+    }
+
+    Document document = ParseDocument(inputStream);
+    inputStream.close();
+
+    expectedExtension = ".md";
 
     std::optional<std::filesystem::path> outputOptional = std::nullopt;
     if (outputFileIndex == 0)
@@ -84,7 +98,15 @@ int main(int argc, const char* argv[])
         outputOptional = std::filesystem::path(argv[outputFileIndex]);
     std::filesystem::path& output = outputOptional.value();
 
-    (void)output;
+    std::ofstream outputStream(output.string());
+    if (!outputStream.is_open())
+    {
+        std::cerr << "Error: Could not open " << output << "\n";
+        return 1;
+    }
+
+    GenerateMarkdown(outputStream, document);
+    outputStream.close();
 
     return 0;
 }
