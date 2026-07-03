@@ -196,16 +196,46 @@ def Copy_Path(logger: logging.Logger, src: Path, dst: Path):
         logger.warning(f"{src} does not exist")
 
 
-def StageLibraries(logger: logging.Logger, dist_dir: Path, include_path: Path | None, libraries: list[tuple[list[tuple[Path, Path | None, Path | None]], list[Path]]]) -> tuple[Path, Path]:
-    license_path = Path("LICENSE")
-    license = dist_dir / "LICENSE"
+def StageOther(logger: logging.Logger, dist_dir: Path):
+    project_root = Path(".")
 
-    include_dir = dist_dir / "include"
-    lib_dir = dist_dir / "lib"
+    readme = project_root / "README.md"
+    license = project_root / "LICENSE"
+
+    docs = project_root / "docs"
+
+    dist_license = dist_dir / "LICENSE"
+
+    dist_share = dist_dir / "share"
+
+    dist_doc = dist_share / "doc" / "scrib"
 
     # License
-    license.parent.mkdir(parents=True, exist_ok=True)
-    Copy_Path(logger, license_path, license)
+    dist_license.parent.mkdir(parents=True, exist_ok=True)
+    Copy_Path(logger, license, dist_license)
+
+    # share/
+    dist_share.mkdir(parents=True, exist_ok=True)
+
+    ## doc/
+    dist_doc.mkdir(parents=True, exist_ok=True)
+
+    ### docs
+    Copy_Path(logger, docs, dist_doc)
+
+    ### LICENSE
+    dist_doc_license = dist_doc / "LICENSE"
+    Copy_Path(logger, license, dist_doc_license)
+
+    ### README.md
+    dist_doc_readme = dist_doc / "README.md"
+    Copy_Path(logger, readme, dist_doc_readme)
+
+
+
+def StageLibraries(logger: logging.Logger, dist_dir: Path, include_path: Path | None, libraries: list[tuple[list[tuple[Path, Path | None, Path | None]], list[Path]]]) -> tuple[Path, Path]:
+    include_dir = dist_dir / "include"
+    lib_dir = dist_dir / "lib"
 
     # Include directory
     if include_path:
@@ -504,6 +534,8 @@ def main() -> bool:
 
             StageExecutables(logger, dist_dir, [scrib])
 
+            StageOther(logger, dist_dir)
+
         else:
             pass
 
@@ -511,6 +543,7 @@ def main() -> bool:
         logger.error(f"Build failed: {e}")
 
         buildCache.save()
+        if dist_dir.exists(): shutil.rmtree(str(dist_dir))
         return False
 
     compileCommands.write(compileCommandsPath)
