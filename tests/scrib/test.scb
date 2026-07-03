@@ -4,6 +4,8 @@ notheader
 
 # header with multiple words
 
+## subheader with multiple words
+
 notheader with multiple words
 
-notheader with # in \*it*it*
+notheader with # in \*it*it**a

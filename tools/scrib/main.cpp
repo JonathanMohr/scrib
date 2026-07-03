@@ -9,6 +9,11 @@
 
 #include "backend/markdown.hpp"
 
+typedef enum Format
+{
+    FORMAT_MARKDOWN
+} Format;
+
 static void printHelp(const char* name, std::ostream& out)
 {
     out << "Usage: " << name << " [-h] [-v] <file> (-o <output)\n";
@@ -17,7 +22,7 @@ static void printHelp(const char* name, std::ostream& out)
     out << "-v/--version            Show the version of this executable\n";
     out << "-o <file>               Specify the output file\n";
     out << "-f/--format <format>    Specify the format for the output\n";
-    out << "                        Options: markdown";
+    out << "                        Options: markdown\n";
 
     out.flush();
 }
@@ -32,16 +37,16 @@ int main(int argc, const char* argv[])
 
     int outputFileIndex = 0;
     int inputFileIndex = 0;
-    const char* format = NULL; // Default
+    const char* formatStr = NULL; // Default
 
     for (int i = 1; i < argc; i++)
     {
-        if (strcmp(argv[i], "-h") == 0 && strcmp(argv[i], "--help"))
+        if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0)
         {
             printHelp(argv[0], std::cout);
             return 0;
         }
-        if (strcmp(argv[i], "-v") == 0 && strcmp(argv[i], "--version"))
+        if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0)
         {
             printVersion();
             return 0;
@@ -65,7 +70,7 @@ int main(int argc, const char* argv[])
 
         else if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "--format") == 0)
         {
-            if (format != NULL)
+            if (formatStr != NULL)
             {
                 std::cerr << "Error: Multiple formats specified\n";
                 return 1;
@@ -76,7 +81,7 @@ int main(int argc, const char* argv[])
                 std::cerr << "Error: Missing format after '-f'/'--format'\n";
                 return 1;
             }
-            format = argv[i];
+            formatStr = argv[i];
         }
 
         else
@@ -96,6 +101,17 @@ int main(int argc, const char* argv[])
         return 1;
     }
 
+    Format format;
+    if (formatStr == NULL || strcmp(formatStr, "markdown") == 0)
+    {
+        format = FORMAT_MARKDOWN;
+    }
+    else
+    {
+        std::cerr << "Error: Invalid format: " << formatStr << '\n';
+        return 1;
+    }
+
     const char* expectedExtension = ".txt"; // TODO: Actually set it
     std::filesystem::path input = std::filesystem::path(argv[inputFileIndex]);
 
@@ -109,7 +125,16 @@ int main(int argc, const char* argv[])
     Document document = ParseDocument(inputStream);
     inputStream.close();
 
-    expectedExtension = ".md";
+    switch (format)
+    {
+        case FORMAT_MARKDOWN:
+            expectedExtension = ".md";
+            break;
+
+        default:
+            std::cerr << "Internal Error: Unknown format" << '\n';
+            return 1;
+    }
 
     std::optional<std::filesystem::path> outputOptional = std::nullopt;
     if (outputFileIndex == 0)
@@ -126,14 +151,15 @@ int main(int argc, const char* argv[])
     }
 
     // Default
-    if (format == NULL | strcmp(format, "markdown") == 0)
+    switch (format)
     {
-        GenerateMarkdown(outputStream, document);
-    }
-    else
-    {
-        std::cerr << "Error: Invalid format: " << format << '\n';
-        return 1;
+        case FORMAT_MARKDOWN:
+            GenerateMarkdown(outputStream, document);
+            break;
+
+        default:
+            std::cerr << "Internal Error: Unknown format" << '\n';
+            return 1;
     }
 
     outputStream.close();
