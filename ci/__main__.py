@@ -231,8 +231,6 @@ def StageOther(logger: logging.Logger, dist_dir: Path):
     dist_doc_readme = dist_doc / "README.md"
     Copy_Path(logger, readme, dist_doc_readme)
 
-
-
 def StageLibraries(logger: logging.Logger, dist_dir: Path, include_path: Path | None, libraries: list[tuple[list[tuple[Path, Path | None, Path | None]], list[Path]]]) -> tuple[Path, Path]:
     include_dir = dist_dir / "include"
     lib_dir = dist_dir / "lib"
