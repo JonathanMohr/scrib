@@ -143,6 +143,8 @@ Document ParseDocument(std::istream& input)
                         status = STATUS_BOLD;
                     else if (status == STATUS_BOLD)
                         status = STATUS_NORMAL;
+                    else
+                        current.text += "*";
                 }
                 else if (c == '_')
                 {
@@ -155,6 +157,8 @@ Document ParseDocument(std::istream& input)
                         status = STATUS_ITALIC;
                     else if (status == STATUS_ITALIC)
                         status = STATUS_NORMAL;
+                    else
+                        current.text += "_";
                 }
                 else if (c == '$')
                 {
@@ -167,6 +171,8 @@ Document ParseDocument(std::istream& input)
                         status = STATUS_ITALIC_BOLD;
                     else if (status == STATUS_ITALIC_BOLD)
                         status = STATUS_NORMAL;
+                    else
+                        current.text += "$";
                 }
                 else
                 {
