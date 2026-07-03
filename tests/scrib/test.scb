@@ -9,3 +9,5 @@ notheader
 notheader with multiple words
 
 notheader with # in \*it*it**a
+
+notheader with $both$

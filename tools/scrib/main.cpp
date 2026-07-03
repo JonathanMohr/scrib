@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <optional>
 
+#include "backend/man.hpp"
 #include "version.h"
 #include "ast.hpp"
 
@@ -11,7 +12,8 @@
 
 typedef enum Format
 {
-    FORMAT_MARKDOWN
+    FORMAT_MARKDOWN,
+    FORMAT_MAN_TROFF
 } Format;
 
 static void printHelp(const char* name, std::ostream& out)
@@ -22,7 +24,12 @@ static void printHelp(const char* name, std::ostream& out)
     out << "-v/--version            Show the version of this executable\n";
     out << "-o <file>               Specify the output file\n";
     out << "-f/--format <format>    Specify the format for the output\n";
-    out << "                        Options: markdown\n";
+    out << "                        Options: markdown, man-troff\n";
+
+    out << "--man-title             Set title when format is man-troff\n";
+    out << "--man-section           Set section when format is man-troff\n";
+    out << "--man-source            Set source when format is man-troff\n";
+    out << "--man-manual            Set manual when format is man-troff\n";
 
     out.flush();
 }
@@ -37,7 +44,12 @@ int main(int argc, const char* argv[])
 
     int outputFileIndex = 0;
     int inputFileIndex = 0;
-    const char* formatStr = NULL; // Default
+    const char* formatStr = NULL;
+
+    const char* manTitle = NULL;
+    const char* manSection = NULL;
+    const char* manSource = NULL;
+    const char* manManual = NULL;
 
     for (int i = 1; i < argc; i++)
     {
@@ -84,6 +96,67 @@ int main(int argc, const char* argv[])
             formatStr = argv[i];
         }
 
+        else if (strcmp(argv[i], "--man-title") == 0)
+        {
+            if (manTitle != NULL)
+            {
+                std::cerr << "Error: Multiple man titles specified\n";
+                return 1;
+            }
+            i++;
+            if (i >= argc)
+            {
+                std::cerr << "Error: Missing string after '--man-title'\n";
+                return 1;
+            }
+            manTitle = argv[i];
+        }
+        else if (strcmp(argv[i], "--man-section") == 0)
+        {
+            if (manSection != NULL)
+            {
+                std::cerr << "Error: Multiple man sections specified\n";
+                return 1;
+            }
+            i++;
+            if (i >= argc)
+            {
+                std::cerr << "Error: Missing string after '--man-section'\n";
+                return 1;
+            }
+            manSection = argv[i];
+        }
+        else if (strcmp(argv[i], "--man-source") == 0)
+        {
+            if (manSource != NULL)
+            {
+                std::cerr << "Error: Multiple man sources specified\n";
+                return 1;
+            }
+            i++;
+            if (i >= argc)
+            {
+                std::cerr << "Error: Missing string after '--man-source'\n";
+                return 1;
+            }
+            manSource = argv[i];
+        }
+        else if (strcmp(argv[i], "--man-manual") == 0)
+        {
+            if (manManual != NULL)
+            {
+                std::cerr << "Error: Multiple man manuals specified\n";
+                return 1;
+            }
+            i++;
+            if (i >= argc)
+            {
+                std::cerr << "Error: Missing string after '--man-manual'\n";
+                return 1;
+            }
+            manManual = argv[i];
+        }
+
         else
         {
             if (inputFileIndex != 0)
@@ -94,6 +167,12 @@ int main(int argc, const char* argv[])
             inputFileIndex = i;
         }
     }
+
+    // Defaults
+    if (!manTitle) manTitle = "scrib";
+    if (!manSection) manSection = "1";
+    if (!manSource) manSource = NULL;
+    if (!manManual) manManual = NULL;
 
     if (inputFileIndex == 0)
     {
@@ -106,13 +185,17 @@ int main(int argc, const char* argv[])
     {
         format = FORMAT_MARKDOWN;
     }
+    else if (strcmp(formatStr, "man-troff") == 0)
+    {
+        format = FORMAT_MAN_TROFF;
+    }
     else
     {
         std::cerr << "Error: Invalid format: " << formatStr << '\n';
         return 1;
     }
 
-    const char* expectedExtension = ".txt"; // TODO: Actually set it
+    const char* expectedExtension = ".txt";
     std::filesystem::path input = std::filesystem::path(argv[inputFileIndex]);
 
     std::ifstream inputStream(input.string());
@@ -125,10 +208,17 @@ int main(int argc, const char* argv[])
     Document document = ParseDocument(inputStream);
     inputStream.close();
 
+    std::string manSectionWithPoint;
     switch (format)
     {
         case FORMAT_MARKDOWN:
             expectedExtension = ".md";
+            break;
+
+        case FORMAT_MAN_TROFF:
+            manSectionWithPoint = ".";
+            manSectionWithPoint += manSection;
+            expectedExtension = manSectionWithPoint.c_str();
             break;
 
         default:
@@ -155,6 +245,10 @@ int main(int argc, const char* argv[])
     {
         case FORMAT_MARKDOWN:
             GenerateMarkdown(outputStream, document);
+            break;
+
+        case FORMAT_MAN_TROFF:
+            GenerateManTroff(outputStream, document, manTitle, manSection, manSource, manManual);
             break;
 
         default:
