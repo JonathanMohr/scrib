@@ -124,14 +124,14 @@ jobs:
       - name: Build on Linux/macOS
         if: ${{ matrix.os_name != 'windows' }}
         run: |
-          FLAGS="-a -A phx-${{ matrix.os_name }}-${{ matrix.arch }} "
+          FLAGS="-a -A scrib-${{ matrix.os_name }}-${{ matrix.arch }} "
           FLAGS+="--os ${{ matrix.os_name }} --arch ${{ matrix.arch }} "
           python3 -m ci $FLAGS
 
       - name: Build on Windows
         if: ${{ matrix.os_name == 'windows' }}
         run: |
-          set FLAGS=-a -A phx-${{ matrix.os_name }}-${{ matrix.arch }}
+          set FLAGS=-a -A scrib-${{ matrix.os_name }}-${{ matrix.arch }}
           set FLAGS=%FLAGS% --os ${{ matrix.os_name }} --arch ${{ matrix.arch }}
           python -m ci %FLAGS%
         shell: cmd
@@ -139,11 +139,11 @@ jobs:
       - name: Upload binaries as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: phx-${{ matrix.os_name }}-${{ matrix.arch }}
+          name: scrib-${{ matrix.os_name }}-${{ matrix.arch }}
           path: dist/
 
       - name: Upload logs as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: phx-${{ matrix.os_name }}-${{ matrix.arch }}-logs
+          name: scrib-${{ matrix.os_name }}-${{ matrix.arch }}-logs
           path: logs/
