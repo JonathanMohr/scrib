@@ -15,7 +15,7 @@ Will be normalized.
 
 ## Style
 
-The style can be stacked.
+The styles are fully independet of eachother.
 
 - Bold: Put text between '*'
 - Italic: Put text between '_'
