@@ -1,6 +1,8 @@
 #include "man.hpp"
+#include "ast.hpp"
 
 #include <ctime>
+#include <ostream>
 #include <sstream>
 #include <iomanip>
 
@@ -85,15 +87,26 @@ void Escape(std::ostream& out, const TextLine& line)
     if (!regular) out << "\\fR";
 }
 
-void GenerateManTroff(
-    std::ostream& out,
-    const Document& document,
-    const char* title,
-    const char* section,
-    const char* source,
-    const char* manual
-)
+void EscapeQuoted(std::ostream& out, const std::string& text)
 {
+    for (char c : text)
+    {
+        if (c == '\\')
+            out << "\\\\";
+        else if (c == '"')
+            out << "\"\"";
+        else
+            out << c;
+    }
+}
+
+void GenerateManTroff(std::ostream& out, const Document& document, const Constants& constants)
+{
+    const std::string* manTitle = constants.get("man-title");
+    const std::string* manSection = constants.get("man-section");
+    const std::string* manSource = constants.get("man-source");
+    const std::string* manManual = constants.get("man-manual");
+
     std::time_t t = std::time(nullptr);
     std::tm utc_tm{};
 
@@ -107,16 +120,41 @@ void GenerateManTroff(
     oss << std::put_time(&utc_tm, "%Y-%m-%d");
 
     // TODO: Actually escape the symbols
-    out << ".TH \""
-        << title << "\" "
-        << section << " \""
-        << oss.str() << "\"";
+    out << ".TH \"";
 
-    if (source)
-        out << " \"" << source << "\"";
+    if (manTitle)
+        EscapeQuoted(out, *manTitle);
+    else
+        out << "scrib";
+    out << "\" ";
+
+    if (manSection)
+        EscapeQuoted(out, *manSection);
+    else
+        out << "1";
+    out << " \"";
+
+    out << oss.str() << '"';
+
+    if (manSource)
+    {
+        out << " \"";
+        EscapeQuoted(out, *manSource);
+        out << '"';
+    }
+    else if (manManual)
+    {
+        out << " \"";
+        EscapeQuoted(out, "source");
+        out << '"';
+    }
     
-    if (manual)
-        out << " \"" << manual << "\"";
+    if (manManual)
+    {
+        out << " \"";
+        EscapeQuoted(out, *manManual);
+        out << '"';
+    }
 
     out << '\n';
 

@@ -66,8 +66,10 @@ void EscapeMarkdown(std::ostream& out, const TextLine& line)
     }
 }
 
-void GenerateMarkdown(std::ostream& out, const Document& document)
+void GenerateMarkdown(std::ostream& out, const Document& document, const Constants& constants)
 {
+    (void)constants;
+    
     for (const Node& node : document.nodes)
     {
         std::visit([&out](const auto& n)

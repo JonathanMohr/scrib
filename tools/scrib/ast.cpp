@@ -1,9 +1,36 @@
 #include "ast.hpp"
-#include <cctype>
 
-Document ParseDocument(std::istream& input)
+void Constants::addForce(const char* name, std::string value)
 {
+    std::deque<std::string>::size_type index = values.size();
+    values.push_back(std::move(value));
+    constants[name] = index;
+}
+
+bool Constants::add(const char* name, std::string value)
+{
+    if (constants.find(name) != constants.end())
+        return false;
+
+    addForce(name, std::move(value));
+    return true;
+}
+
+const std::string* Constants::get(const char* name) const
+{
+    auto it = constants.find(name);
+    if (it == constants.end()) return nullptr;
+
+    std::deque<std::string>::size_type index = it->second;
+    return &values[index];
+}
+
+Document ParseDocument(std::istream& input, Constants& constants)
+{
+    (void)constants;
+
     Document doc;
+
     std::string line;
 
     TextLine textLine;

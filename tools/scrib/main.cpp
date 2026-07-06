@@ -26,10 +26,17 @@ static void printHelp(const char* name, std::ostream& out)
     out << "-f/--format <format>    Specify the format for the output\n";
     out << "                        Options: markdown, man-troff\n";
 
-    out << "--man-title             Set title when format is man-troff\n";
-    out << "--man-section           Set section when format is man-troff\n";
-    out << "--man-source            Set source when format is man-troff\n";
-    out << "--man-manual            Set manual when format is man-troff\n";
+    out << "-C<name> <value>        Define a constant with a value";
+
+    out << "\nFormats:\n";
+    out << "- markdown:\n";
+    out << "    Constants: None\n";
+    out << "- man-troff:\n";
+    out << "    Constants:\n";
+    out << "    - man-title:    Title for the output (default: 'scrib')\n";
+    out << "    - man-section:  Section for the man output (default: '1')\n";
+    out << "    - man-source:   Source for the man output (default: 'source' if man-manual else <none>)\n";
+    out << "    - man-manual:   Manual for the man output (default: <none>)\n";
 
     out.flush();
 }
@@ -42,14 +49,11 @@ int main(int argc, const char* argv[])
         return 1;
     }
 
+    Constants constants;
+
     int outputFileIndex = 0;
     int inputFileIndex = 0;
     const char* formatStr = NULL;
-
-    const char* manTitle = NULL;
-    const char* manSection = NULL;
-    const char* manSource = NULL;
-    const char* manManual = NULL;
 
     for (int i = 1; i < argc; i++)
     {
@@ -96,65 +100,30 @@ int main(int argc, const char* argv[])
             formatStr = argv[i];
         }
 
-        else if (strcmp(argv[i], "--man-title") == 0)
+        else if (memcmp(argv[i], "-C", 2) == 0)
         {
-            if (manTitle != NULL)
+            const char* arg = argv[i];
+            if (strlen(arg) == 2)
             {
-                std::cerr << "Error: Multiple man titles specified\n";
+                std::cerr << "Error: Missing name after '-C'\n";
                 return 1;
             }
+
             i++;
             if (i >= argc)
             {
-                std::cerr << "Error: Missing string after '--man-title'\n";
+                std::cerr << "Error: Missing value after '" << arg << "'\n";
                 return 1;
             }
-            manTitle = argv[i];
-        }
-        else if (strcmp(argv[i], "--man-section") == 0)
-        {
-            if (manSection != NULL)
+
+            const char* name = arg + 2;
+            const char* value = argv[i];
+
+            if (!constants.add(name, value))
             {
-                std::cerr << "Error: Multiple man sections specified\n";
+                std::cerr << "Error: Constant '" << name << "' already defined\n";
                 return 1;
             }
-            i++;
-            if (i >= argc)
-            {
-                std::cerr << "Error: Missing string after '--man-section'\n";
-                return 1;
-            }
-            manSection = argv[i];
-        }
-        else if (strcmp(argv[i], "--man-source") == 0)
-        {
-            if (manSource != NULL)
-            {
-                std::cerr << "Error: Multiple man sources specified\n";
-                return 1;
-            }
-            i++;
-            if (i >= argc)
-            {
-                std::cerr << "Error: Missing string after '--man-source'\n";
-                return 1;
-            }
-            manSource = argv[i];
-        }
-        else if (strcmp(argv[i], "--man-manual") == 0)
-        {
-            if (manManual != NULL)
-            {
-                std::cerr << "Error: Multiple man manuals specified\n";
-                return 1;
-            }
-            i++;
-            if (i >= argc)
-            {
-                std::cerr << "Error: Missing string after '--man-manual'\n";
-                return 1;
-            }
-            manManual = argv[i];
         }
 
         else
@@ -167,12 +136,6 @@ int main(int argc, const char* argv[])
             inputFileIndex = i;
         }
     }
-
-    // Defaults
-    if (!manTitle) manTitle = "scrib";
-    if (!manSection) manSection = "1";
-    if (!manSource) manSource = NULL;
-    if (!manManual) manManual = NULL;
 
     if (inputFileIndex == 0)
     {
@@ -205,10 +168,9 @@ int main(int argc, const char* argv[])
         return 1;
     }
 
-    Document document = ParseDocument(inputStream);
+    Document document = ParseDocument(inputStream, constants);
     inputStream.close();
 
-    std::string manSectionWithPoint;
     switch (format)
     {
         case FORMAT_MARKDOWN:
@@ -216,9 +178,7 @@ int main(int argc, const char* argv[])
             break;
 
         case FORMAT_MAN_TROFF:
-            manSectionWithPoint = ".";
-            manSectionWithPoint += manSection;
-            expectedExtension = manSectionWithPoint.c_str();
+            expectedExtension = ".man-troff";
             break;
 
         default:
@@ -244,11 +204,11 @@ int main(int argc, const char* argv[])
     switch (format)
     {
         case FORMAT_MARKDOWN:
-            GenerateMarkdown(outputStream, document);
+            GenerateMarkdown(outputStream, document, constants);
             break;
 
         case FORMAT_MAN_TROFF:
-            GenerateManTroff(outputStream, document, manTitle, manSection, manSource, manManual);
+            GenerateManTroff(outputStream, document, constants);
             break;
 
         default:

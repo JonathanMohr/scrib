@@ -3,11 +3,4 @@
 #include <ast.hpp>
 #include <ostream>
 
-void GenerateManTroff(
-    std::ostream& out,
-    const Document& document,
-    const char* title,
-    const char* section,
-    const char* source,
-    const char* manual
-);
+void GenerateManTroff(std::ostream& out, const Document& document, const Constants& constants);
