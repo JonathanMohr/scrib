@@ -3,4 +3,4 @@
 #include <ast.hpp>
 #include <ostream>
 
-void GenerateManTroff(std::ostream& out, const Document& document, const Constants& constants);
+void GenerateManTroff(std::ostream& out, const Document& document, const Constants& constants, bool verySafe);

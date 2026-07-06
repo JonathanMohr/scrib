@@ -29,6 +29,8 @@ static void printHelp(const char* name, std::ostream& out)
 
     out << "-C<name> <value>        Define a constant with a value\n";
 
+    out << "--strict                Use a more strict mode, output might be longer, but more consistent\n";
+
     out << "\nFormats:\n";
     out << "- markdown:\n";
     out << "    Constants: None\n";
@@ -51,6 +53,8 @@ int main(int argc, const char* argv[])
             printHelp(argv[0], std::cerr);
             return 1;
         }
+
+        bool strict = false;
 
         Constants constants;
 
@@ -127,6 +131,11 @@ int main(int argc, const char* argv[])
                     std::cerr << "Error: Constant '" << name << "' already defined\n";
                     return 1;
                 }
+            }
+
+            else if (strcmp(argv[i], "--strict") == 0)
+            {
+                strict = true;
             }
 
             else
@@ -207,11 +216,11 @@ int main(int argc, const char* argv[])
         switch (format)
         {
             case FORMAT_MARKDOWN:
-                GenerateMarkdown(outputStream, document, constants);
+                GenerateMarkdown(outputStream, document, constants, strict);
                 break;
 
             case FORMAT_MAN_TROFF:
-                GenerateManTroff(outputStream, document, constants);
+                GenerateManTroff(outputStream, document, constants, strict);
                 break;
 
             default:

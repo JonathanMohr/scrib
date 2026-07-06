@@ -1,7 +1,10 @@
 #include "markdown.hpp"
 
-void EscapeMarkdown(std::ostream& out, const TextLine& line)
+void EscapeMarkdown(std::ostream& out, const TextLine& line, bool verySafe)
 {
+    bool space = true;
+    bool lastSpecial = false;
+
     bool lastEndStar = false;
 
     bool lineStart = true;
@@ -20,6 +23,17 @@ void EscapeMarkdown(std::ostream& out, const TextLine& line)
         std::string content = text.text.substr(startSpaceCount, text.text.size() -startSpaceCount - endSpaceCount);
 
         for (uint64_t i = 0; i < startSpaceCount; i++) out << ' ';
+        if (startSpaceCount > 0) space = true;
+
+        if (!space && lastSpecial && verySafe)
+        {
+            if (text.bold || text.italic)
+            {
+                out << "&#x200B;";
+            }
+        }
+        lastSpecial = false;
+        space = false;
 
         bool boldStar = false;
         bool italicStar = false;
@@ -101,6 +115,7 @@ void EscapeMarkdown(std::ostream& out, const TextLine& line)
                 out << "_";
             else
                 out << "*";
+            lastSpecial = true;
         }
         if (text.bold)
         {
@@ -109,19 +124,21 @@ void EscapeMarkdown(std::ostream& out, const TextLine& line)
                 out << "__";
             else
                 out << "**";
+            lastSpecial = true;
         }
 
         for (uint64_t i = 0; i < endSpaceCount; i++) out << ' ';
+        if (endSpaceCount > 0) space = true;
     }
 }
 
-void GenerateMarkdown(std::ostream& out, const Document& document, const Constants& constants)
+void GenerateMarkdown(std::ostream& out, const Document& document, const Constants& constants, bool verySafe)
 {
     (void)constants;
     
     for (const Node& node : document.nodes)
     {
-        std::visit([&out](const auto& n)
+        std::visit([&out, &verySafe](const auto& n)
         {
             using T = std::decay_t<decltype(n)>;
 
@@ -129,12 +146,12 @@ void GenerateMarkdown(std::ostream& out, const Document& document, const Constan
             {
                 if (n.subheading) out << '#';
                 out << "# ";
-                EscapeMarkdown(out, n.text);
+                EscapeMarkdown(out, n.text, verySafe);
                 out << '\n'; 
             }
             else if constexpr (std::is_same_v<T, TextLine>)
             {
-                EscapeMarkdown(out, n);
+                EscapeMarkdown(out, n, verySafe);
                 out << '\n';
             }
             else if constexpr (std::is_same_v<T, EmptyLine>)

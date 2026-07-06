@@ -100,8 +100,10 @@ void EscapeQuoted(std::ostream& out, const std::string& text)
     }
 }
 
-void GenerateManTroff(std::ostream& out, const Document& document, const Constants& constants)
+void GenerateManTroff(std::ostream& out, const Document& document, const Constants& constants, bool verySafe)
 {
+    (void)verySafe;
+
     const std::string* manTitle = constants.get("man-title");
     const std::string* manSection = constants.get("man-section");
     const std::string* manSource = constants.get("man-source");
