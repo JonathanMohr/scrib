@@ -6,7 +6,7 @@ This is _italic_.
 
 This space is* bold*.
 
-This space is_ italic.
+This space is_ italic_.
 
 This is *_both_*.
 
@@ -17,3 +17,9 @@ _This *is* nested_.
 This *is _not* easy_.
 
 This _is *complicated_ too*.
+
+This *does not close.
+But here it is normal again.
+
+This _does not close too.
+But is normal as expected here.
