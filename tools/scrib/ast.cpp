@@ -42,7 +42,7 @@ Document ParseDocument(std::istream& input, Constants& constants)
     while (std::getline(input, raw))
     {
         uint64_t spaceCount = 0;
-        while (spaceCount < raw.size() && std::isspace(raw[spaceCount]))
+        while (spaceCount < raw.size() && std::isspace(static_cast<unsigned char>(raw[spaceCount])))
             spaceCount++;
 
         std::string line = raw.substr(spaceCount);
@@ -58,13 +58,13 @@ Document ParseDocument(std::istream& input, Constants& constants)
             std::string::size_type i = 1;
             while (i < line.size())
             {
-                if (std::isspace(line[i])) break;
+                if (std::isspace(static_cast<unsigned char>(line[i]))) break;
                 i++;
             }
 
             const std::string name = line.substr(1, i - 1);
 
-            while (i < line.size() && std::isspace(line[i])) i++;
+            while (i < line.size() && std::isspace(static_cast<unsigned char>(line[i]))) i++;
 
             const std::string value = line.substr(i);
 
@@ -110,13 +110,7 @@ Document ParseDocument(std::istream& input, Constants& constants)
                 else if (c == '*')
                 {
                     if (current.text.size() > 0)
-                    {
-                        if (std::isspace(current.text[0]))
-                            current.text.erase(0, 1);
-                        if (!current.text.empty() && std::isspace(current.text[current.text.size() - 1]))
-                            current.text.pop_back();
                         textLine.content.push_back(current);
-                    }
                     current.text.clear();
 
                     current.bold = !current.bold;
@@ -124,22 +118,16 @@ Document ParseDocument(std::istream& input, Constants& constants)
                 else if (c == '_')
                 {
                     if (current.text.size() > 0)
-                    {
-                        if (std::isspace(current.text[0]))
-                            current.text.erase(0, 1);
-                        if (!current.text.empty() && std::isspace(current.text[current.text.size() - 1]))
-                            current.text.pop_back();
                         textLine.content.push_back(current);
-                    }
                     current.text.clear();
 
                     current.italic = !current.italic;
                 }
                 else
                 {
-                    if (std::isspace(line[i]))
+                    if (std::isspace(static_cast<unsigned char>(line[i])))
                     {
-                        while (i + 1 < line.size() && std::isspace(line[i + 1]))
+                        while (i + 1 < line.size() && std::isspace(static_cast<unsigned char>(line[i + 1])))
                             i++;
                     }
                     current.text += line[i];
@@ -149,13 +137,7 @@ Document ParseDocument(std::istream& input, Constants& constants)
             if (!current.text.empty())
             {
                 if (current.text.size() > 0)
-                {
-                    if (std::isspace(current.text[0]))
-                        current.text.erase(0, 1);
-                    if (!current.text.empty() && std::isspace(current.text[current.text.size() - 1]))
-                        current.text.pop_back();
                     textLine.content.push_back(current);
-                }
             }
 
             if (line.size() > 1 && line[1] == '#')
@@ -196,13 +178,7 @@ Document ParseDocument(std::istream& input, Constants& constants)
                 if (c == '*')
                 {
                     if (current.text.size() > 0)
-                    {
-                        if (std::isspace(current.text[0]))
-                            current.text.erase(0, 1);
-                        if (!current.text.empty() && std::isspace(current.text[current.text.size() - 1]))
-                            current.text.pop_back();
                         textLine.content.push_back(current);
-                    }
                     current.text.clear();
 
                     current.bold = !current.bold;
@@ -210,22 +186,16 @@ Document ParseDocument(std::istream& input, Constants& constants)
                 else if (c == '_')
                 {
                     if (current.text.size() > 0)
-                    {
-                        if (std::isspace(current.text[0]))
-                            current.text.erase(0, 1);
-                        if (!current.text.empty() && std::isspace(current.text[current.text.size() - 1]))
-                            current.text.pop_back();
                         textLine.content.push_back(current);
-                    }
                     current.text.clear();
 
                     current.italic = !current.italic;
                 }
                 else
                 {
-                    if (std::isspace(line[i]))
+                    if (std::isspace(static_cast<unsigned char>(line[i])))
                     {
-                        while (i + 1 < line.size() && std::isspace(line[i + 1]))
+                        while (i + 1 < line.size() && std::isspace(static_cast<unsigned char>(line[i + 1])))
                             i++;
                     }
                     current.text += line[i];
@@ -235,13 +205,7 @@ Document ParseDocument(std::istream& input, Constants& constants)
             if (!current.text.empty())
             {
                 if (current.text.size() > 0)
-                {
-                    if (std::isspace(current.text[0]))
-                        current.text.erase(0, 1);
-                    if (!current.text.empty() && std::isspace(current.text[current.text.size() - 1]))
-                        current.text.pop_back();
                     textLine.content.push_back(current);
-                }
             }
 
             if (textLine.content.size() > 0)

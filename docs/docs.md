@@ -32,9 +32,7 @@ For now, constants are just used by the backend.
 
 # Formatting
 
-## Spacing
-
-Will be normalized.
+Leading spaces will be ignored
 
 ## Header
 

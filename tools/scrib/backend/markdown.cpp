@@ -2,17 +2,53 @@
 
 void EscapeMarkdown(std::ostream& out, const TextLine& line)
 {
+    bool lastEndStar = false;
+
     bool lineStart = true;
     for (std::size_t idx = 0; idx < line.content.size(); idx++)
     {
         const Text& text = line.content[idx];
 
-        if (text.bold) out << "**";
-        if (text.italic) out << "_";
+        uint64_t startSpaceCount = 0;
+        while (startSpaceCount < text.text.size() && std::isspace(static_cast<unsigned char>(text.text[startSpaceCount])))
+            startSpaceCount++;
 
-        for (std::size_t i = 0; i < text.text.size(); i++)
+        uint64_t endSpaceCount = 0;
+        while (endSpaceCount < text.text.size() && std::isspace(static_cast<unsigned char>(text.text[text.text.size() - 1 - endSpaceCount])))
+            endSpaceCount++;
+
+        std::string content = text.text.substr(startSpaceCount, text.text.size() -startSpaceCount - endSpaceCount);
+
+        for (uint64_t i = 0; i < startSpaceCount; i++) out << ' ';
+
+        bool boldStar = false;
+        bool italicStar = false;
+        if (text.bold)
         {
-            const char c = text.text[i];
+            if (lastEndStar)
+                out << "__";
+            else
+            {
+                out << "**";
+                boldStar = true;
+            }
+            lastEndStar = !lastEndStar;
+        }
+        if (text.italic)
+        {
+            if (lastEndStar)
+                out << "_";
+            else
+            {
+                out << "*";
+                italicStar = true;
+            }
+            lastEndStar = !lastEndStar;
+        }
+
+        for (std::size_t i = 0; i < content.size(); i++)
+        {
+            const char c = content[i];
 
             if (lineStart && std::isspace(static_cast<unsigned char>(c)))
             {
@@ -33,12 +69,12 @@ void EscapeMarkdown(std::ostream& out, const TextLine& line)
                 if (std::isdigit(static_cast<unsigned char>(c)))
                 {
                     std::size_t j = i;
-                    while (j < text.text.size() && std::isdigit(static_cast<unsigned char>(text.text[j])))
+                    while (j < content.size() && std::isdigit(static_cast<unsigned char>(content[j])))
                         j++;
-                    if (j < text.text.size() && (text.text[j] == '.' || text.text[j] == ')'))
+                    if (j < content.size() && (content[j] == '.' || content[j] == ')'))
                     {
-                        out << text.text.substr(i, j - i);
-                        out << '\\' << text.text[j];
+                        out << content.substr(i, j - i);
+                        out << '\\' << content[j];
                         i = j;
                         continue;
                     }
@@ -58,11 +94,24 @@ void EscapeMarkdown(std::ostream& out, const TextLine& line)
             }
         }
 
-        if (text.italic) out << "_";
-        if (text.bold) out << "**";
+        if (text.italic)
+        {
+            lastEndStar = italicStar;
+            if (!italicStar)
+                out << "_";
+            else
+                out << "*";
+        }
+        if (text.bold)
+        {
+            lastEndStar = boldStar;
+            if (!boldStar)
+                out << "__";
+            else
+                out << "**";
+        }
 
-        if ((idx + 1) < line.content.size())
-            out << ' ';
+        for (uint64_t i = 0; i < endSpaceCount; i++) out << ' ';
     }
 }
 
