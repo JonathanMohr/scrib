@@ -1,0 +1,13 @@
+# Escaping
+
+This would be \*bold\*.
+
+This would be \_italic\_.
+
+\%This would define a constant.
+
+\# This would be a header.
+
+I don't know why \- is escaped.
+
+\\ This is the escape sign!

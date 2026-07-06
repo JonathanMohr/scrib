@@ -158,7 +158,7 @@ void GenerateManTroff(std::ostream& out, const Document& document, const Constan
         out << '"';
     }
 
-    out << '\n';
+    out << "\n\n";
 
     for (const Node& node : document.nodes)
     {

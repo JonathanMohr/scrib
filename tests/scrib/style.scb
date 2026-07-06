@@ -1,0 +1,19 @@
+# Style
+
+This is *bold*.
+
+This is _italic_.
+
+This space is* bold*.
+
+This space is_ italic.
+
+This is *_both_*.
+
+*This _is_ nested*.
+
+_This *is* nested_.
+
+This *is _not* easy_.
+
+This _is *complicated_ too*.
