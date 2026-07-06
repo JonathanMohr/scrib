@@ -10,4 +10,5 @@ notheader with multiple words
 
 notheader with # in \*it*it**a
 
-notheader with $both$
+notheader      with *a _b* c_
+notheader with *a _b_ c*

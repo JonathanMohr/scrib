@@ -4,18 +4,25 @@ If you write text, it will be put out exactly the way you wrote it, with a few e
 
 # Formatting
 
-- Starting a line with '#'  will result in a header
-- Starting a line with '##' will result in a subheader
-- Everything that is put between '*' will be marked bold
-- Everything that is put between '_' will be marked italic
-- Everything that is put between '$' will be marked italic and bold
+## Header
+
+- Start a line with '\#' for a header
+- Start a line with '\#\#' for a subheader
+
+## Style
+
+The style can be stacked.
+
+- Bold: Put text between '*'
+- Italic: Put text between '_'
 
 # Escaping
 
-There is a list of symbols that can be backspaces, else it will just put a backspace there:
+There is a list of symbols that can be escaped by using a backslash. If a backslash is used without any of the recognized symbols following, it will be interpreted as normal text.
 
 - "\\\#" will result in '\#'
 - "\\\*" will result in '\*'
 - "\\\_" will result in '\_'
 - "\\$" will result in '$'
+- "\\-" will result in '-'
 - "\\\\" will result in '\\'

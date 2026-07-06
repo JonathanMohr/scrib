@@ -6,25 +6,27 @@
 
 void Escape(std::ostream& out, const TextLine& line)
 {
-    bool skipMarker = false;
+    bool regular = true;
 
     bool lineStart = true;
     for (std::size_t idx = 0; idx < line.content.size(); idx++)
     {
         const Text& text = line.content[idx];
 
-        if (!skipMarker)
+        bool newRegular = false;
+        if (!text.bold && text.italic)
+            out << "\\fI";
+        else if (text.bold && !text.italic)
+            out << "\\fB";
+        else if (text.bold && text.italic)
+            out << "\\f(BI";
+        else
         {
-            if (!text.bold && text.italic)
-                out << "\\fI";
-            else if (text.bold && !text.italic)
-                out << "\\fB";
-            else if (text.bold && text.italic)
-                out << "\\f(BI";
-            else if(!lineStart)
-                out << "\\fR";
+            newRegular = true;
+            if (!regular) out << "\\fR";
         }
-        skipMarker = false;
+
+        regular = newRegular;
 
         for (std::size_t i = 0; i < text.text.size(); i++)
         {
@@ -78,19 +80,9 @@ void Escape(std::ostream& out, const TextLine& line)
                     break;
             }
         }
-
-        if (idx + 1 < line.content.size() &&
-            line.content[idx + 1].bold == text.bold &&
-            line.content[idx + 1].italic == text.italic &&
-            (text.bold || text.italic))
-            skipMarker = true;
-        else
-        {
-            
-        }
     }
 
-    out << "\\fR";
+    if (!regular) out << "\\fR";
 }
 
 void GenerateManTroff(

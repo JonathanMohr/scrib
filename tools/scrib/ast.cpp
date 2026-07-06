@@ -1,38 +1,5 @@
 #include "ast.hpp"
-
-typedef enum Status
-{
-    STATUS_NORMAL,
-    STATUS_ITALIC,
-    STATUS_BOLD,
-    STATUS_ITALIC_BOLD
-} Status;
-
-static void convertStatus(Status status, bool& bold, bool& italic)
-{
-    switch (status)
-    {
-        case STATUS_ITALIC:
-            bold = false;
-            italic = true;
-            break;
-
-        case STATUS_BOLD:
-            bold = true;
-            italic = false;
-            break;
-
-        case STATUS_ITALIC_BOLD:
-            bold = true;
-            italic = true;
-            break;
-
-        case STATUS_NORMAL: default:
-            bold = false;
-            italic = false;
-            break;
-    }
-}
+#include <cctype>
 
 Document ParseDocument(std::istream& input)
 {
@@ -41,12 +8,13 @@ Document ParseDocument(std::istream& input)
 
     TextLine textLine;
     Text current;
-    Status status;
+
     while (std::getline(input, line))
     {
         textLine.content.clear();
         current.text.clear();
-        status = STATUS_NORMAL;
+        current.bold = false;
+        current.italic = false;
 
         if (!line.empty() && line[0] == '#')
         {
@@ -65,7 +33,9 @@ Document ParseDocument(std::istream& input)
                     i++;
                     if (i < line.size())
                     {
-                        if (line[i] == '*' || line[i] == '_' || line[i] == '\\')
+                        if (line[i] == '#' || line[i] == '*' ||
+                            line[i] == '_' || line[i] == '-' ||
+                            line[i] == '\\')
                         {
                             current.text += line[i];
                             continue;
@@ -75,27 +45,53 @@ Document ParseDocument(std::istream& input)
                 }
                 else if (c == '*')
                 {
-                    convertStatus(status, current.bold, current.italic);
                     if (current.text.size() > 0)
+                    {
+                        if (std::isspace(current.text[0]))
+                            current.text.erase(0, 1);
+                        if (!current.text.empty() && std::isspace(current.text[current.text.size() - 1]))
+                            current.text.pop_back();
                         textLine.content.push_back(current);
+                    }
                     current.text.clear();
 
-                    if (status == STATUS_NORMAL)
-                        status = STATUS_BOLD;
-                    else if (status == STATUS_BOLD)
-                        status = STATUS_NORMAL;
+                    current.bold = !current.bold;
+                }
+                else if (c == '_')
+                {
+                    if (current.text.size() > 0)
+                    {
+                        if (std::isspace(current.text[0]))
+                            current.text.erase(0, 1);
+                        if (!current.text.empty() && std::isspace(current.text[current.text.size() - 1]))
+                            current.text.pop_back();
+                        textLine.content.push_back(current);
+                    }
+                    current.text.clear();
+
+                    current.italic = !current.italic;
                 }
                 else
                 {
+                    if (std::isspace(line[i]))
+                    {
+                        while (i + 1 < line.size() && std::isspace(line[i + 1]))
+                            i++;
+                    }
                     current.text += line[i];
                 }
             }
 
             if (!current.text.empty())
             {
-                convertStatus(status, current.bold, current.italic);
                 if (current.text.size() > 0)
+                {
+                    if (std::isspace(current.text[0]))
+                        current.text.erase(0, 1);
+                    if (!current.text.empty() && std::isspace(current.text[current.text.size() - 1]))
+                        current.text.pop_back();
                     textLine.content.push_back(current);
+                }
             }
 
             if (line.size() > 1 && line[1] == '#')
@@ -119,7 +115,7 @@ Document ParseDocument(std::istream& input)
                     if (i < line.size())
                     {
                         if (line[i] == '#' || line[i] == '*' ||
-                            line[i] == '_' || line[i] == '$' ||
+                            line[i] == '_' || line[i] == '-' ||
                             line[i] == '\\')
                         {
                             current.text += line[i];
@@ -134,57 +130,53 @@ Document ParseDocument(std::istream& input)
                 
                 if (c == '*')
                 {
-                    convertStatus(status, current.bold, current.italic);
                     if (current.text.size() > 0)
+                    {
+                        if (std::isspace(current.text[0]))
+                            current.text.erase(0, 1);
+                        if (!current.text.empty() && std::isspace(current.text[current.text.size() - 1]))
+                            current.text.pop_back();
                         textLine.content.push_back(current);
+                    }
                     current.text.clear();
 
-                    if (status == STATUS_NORMAL)
-                        status = STATUS_BOLD;
-                    else if (status == STATUS_BOLD)
-                        status = STATUS_NORMAL;
-                    else
-                        current.text += "*";
+                    current.bold = !current.bold;
                 }
                 else if (c == '_')
                 {
-                    convertStatus(status, current.bold, current.italic);
                     if (current.text.size() > 0)
+                    {
+                        if (std::isspace(current.text[0]))
+                            current.text.erase(0, 1);
+                        if (!current.text.empty() && std::isspace(current.text[current.text.size() - 1]))
+                            current.text.pop_back();
                         textLine.content.push_back(current);
+                    }
                     current.text.clear();
 
-                    if (status == STATUS_NORMAL)
-                        status = STATUS_ITALIC;
-                    else if (status == STATUS_ITALIC)
-                        status = STATUS_NORMAL;
-                    else
-                        current.text += "_";
-                }
-                else if (c == '$')
-                {
-                    convertStatus(status, current.bold, current.italic);
-                    if (current.text.size() > 0)
-                        textLine.content.push_back(current);
-                    current.text.clear();
-
-                    if (status == STATUS_NORMAL)
-                        status = STATUS_ITALIC_BOLD;
-                    else if (status == STATUS_ITALIC_BOLD)
-                        status = STATUS_NORMAL;
-                    else
-                        current.text += "$";
+                    current.italic = !current.italic;
                 }
                 else
                 {
+                    if (std::isspace(line[i]))
+                    {
+                        while (i + 1 < line.size() && std::isspace(line[i + 1]))
+                            i++;
+                    }
                     current.text += line[i];
                 }
             }
 
             if (!current.text.empty())
             {
-                convertStatus(status, current.bold, current.italic);
                 if (current.text.size() > 0)
+                {
+                    if (std::isspace(current.text[0]))
+                        current.text.erase(0, 1);
+                    if (!current.text.empty() && std::isspace(current.text[current.text.size() - 1]))
+                        current.text.pop_back();
                     textLine.content.push_back(current);
+                }
             }
 
             if (textLine.content.size() > 0)

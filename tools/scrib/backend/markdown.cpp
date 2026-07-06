@@ -2,23 +2,13 @@
 
 void EscapeMarkdown(std::ostream& out, const TextLine& line)
 {
-    bool skipMarker = false;
-
     bool lineStart = true;
     for (std::size_t idx = 0; idx < line.content.size(); idx++)
     {
         const Text& text = line.content[idx];
 
-        const char* marker = NULL;
-        if (!text.bold && text.italic)
-            marker = "*";
-        else if (text.bold && !text.italic)
-            marker = "**";
-        else if (text.bold && text.italic)
-            marker = "***";
-
-        if (marker && !skipMarker) out << marker;
-        skipMarker = false;
+        if (text.bold) out << "**";
+        if (text.italic) out << "_";
 
         for (std::size_t i = 0; i < text.text.size(); i++)
         {
@@ -68,12 +58,11 @@ void EscapeMarkdown(std::ostream& out, const TextLine& line)
             }
         }
 
-        if (idx + 1 < line.content.size() &&
-            line.content[idx + 1].bold == text.bold &&
-            line.content[idx + 1].italic == text.italic &&
-            (text.bold || text.italic))
-            skipMarker = true;
-        else if (marker) out << marker;
+        if (text.italic) out << "_";
+        if (text.bold) out << "**";
+
+        if ((idx + 1) < line.content.size())
+            out << ' ';
     }
 }
 
