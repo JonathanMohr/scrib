@@ -41,7 +41,7 @@ Leading spaces will be ignored
 
 ## Style
 
-The styles are fully independet of eachother.
+The styles are fully independent of eachother.
 
 - Bold: Put text between '*'
 - Italic: Put text between '_'
