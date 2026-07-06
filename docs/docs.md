@@ -4,6 +4,10 @@ If you write text, it will be put out exactly the way you wrote it, with a few e
 
 # Formatting
 
+## Spacing
+
+Will be normalized.
+
 ## Header
 
 - Start a line with '\#' for a header
