@@ -1,4 +1,8 @@
 #include "ast.hpp"
+#include <cctype>
+#include <exception>
+#include <iostream>
+#include <stdexcept>
 
 void Constants::addForce(const char* name, std::string value)
 {
@@ -31,13 +35,47 @@ Document ParseDocument(std::istream& input, Constants& constants)
 
     Document doc;
 
-    std::string line;
+    std::string raw;
 
     TextLine textLine;
     Text current;
 
-    while (std::getline(input, line))
+    while (std::getline(input, raw))
     {
+        uint64_t spaceCount = 0;
+        while (spaceCount < raw.size() && std::isspace(raw[spaceCount]))
+            spaceCount++;
+
+        std::string line = raw.substr(spaceCount);
+        if (line.empty())
+        {
+            doc.nodes.push_back(Node{EmptyLine{}});
+            continue;
+        }
+
+        // Constant
+        if (line[0] == '%')
+        {
+            std::string::size_type i = 1;
+            while (i < line.size())
+            {
+                if (std::isspace(line[i])) break;
+                i++;
+            }
+
+            const std::string name = line.substr(1, i - 1);
+
+            while (i < line.size() && std::isspace(line[i])) i++;
+
+            const std::string value = line.substr(i);
+
+            std::cerr << name << " = " << value << '\n';
+            if (!constants.add(name, value))
+                throw std::runtime_error("'" + name + "' defined multiple times.");
+
+            continue;
+        }
+
         textLine.content.clear();
         current.text.clear();
         current.bold = false;

@@ -1,3 +1,5 @@
+%man-title Test Title
+
 # header
 
 notheader
@@ -8,7 +10,7 @@ notheader
 
 notheader with multiple words
 
-notheader with # in \*it*it**a
+   notheader with # in \*it*it**a
 
 notheader      with *a _b* c_
 notheader with *a _b_ c*

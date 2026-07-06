@@ -140,13 +140,13 @@ def Get_Compile_Flags(mode: BuildMode) -> list[str]:
     if mode.debuginfo:
         flags.extend([
             "-g3",
-            "-fno-omit-frame-pointer"
+#            "-fno-omit-frame-pointer"
         ])
-    else:
-        if mode.optimization == OPTIMIZATION.NONE:
-            flags.append("-fno-omit-frame-pointer")
-        else:
-            flags.append("-fomit-frame-pointer")
+#    else:
+#        if mode.optimization == OPTIMIZATION.NONE:
+#            flags.append("-fno-omit-frame-pointer")
+#        else:
+#            flags.append("-fomit-frame-pointer")
 
     # Host
     match mode.host:
@@ -282,14 +282,14 @@ def Get_Link_Flags(mode: BuildMode) -> list[str]:
                 "-Wl,/DEBUG"
             ])
 
-        if mode.lto:
-            flags.append("-fno-omit-frame-pointer")
+#        if mode.lto:
+#            flags.append("-fno-omit-frame-pointer")
     else:
-        if mode.lto:
-            if mode.optimization == OPTIMIZATION.NONE:
-                flags.append("-fno-omit-frame-pointer")
-            else:
-                flags.append("-fomit-frame-pointer")
+#        if mode.lto:
+#            if mode.optimization == OPTIMIZATION.NONE:
+#                flags.append("-fno-omit-frame-pointer")
+#            else:
+#                flags.append("-fomit-frame-pointer")
 
         if mode.target_os == OS.Windows:
             flags.extend([
