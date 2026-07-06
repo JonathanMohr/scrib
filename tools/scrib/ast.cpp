@@ -1,6 +1,5 @@
 #include "ast.hpp"
 #include <cctype>
-#include <exception>
 #include <iostream>
 #include <stdexcept>
 
@@ -69,7 +68,6 @@ Document ParseDocument(std::istream& input, Constants& constants)
 
             const std::string value = line.substr(i);
 
-            std::cerr << name << " = " << value << '\n';
             if (!constants.add(name, value))
                 throw std::runtime_error("'" + name + "' defined multiple times.");
 
@@ -100,13 +98,14 @@ Document ParseDocument(std::istream& input, Constants& constants)
                     {
                         if (line[i] == '#' || line[i] == '*' ||
                             line[i] == '_' || line[i] == '-' ||
-                            line[i] == '\\')
+                            line[i] == '\\' || line[i] == '%')
                         {
                             current.text += line[i];
                             continue;
                         }
                     }
 
+                    current.text += '\\';
                 }
                 else if (c == '*')
                 {
@@ -181,7 +180,7 @@ Document ParseDocument(std::istream& input, Constants& constants)
                     {
                         if (line[i] == '#' || line[i] == '*' ||
                             line[i] == '_' || line[i] == '-' ||
-                            line[i] == '\\')
+                            line[i] == '\\' || line[i] == '%')
                         {
                             current.text += line[i];
                             continue;
@@ -189,6 +188,7 @@ Document ParseDocument(std::istream& input, Constants& constants)
                     }
                     
                     current.text += '\\';
+                    continue;
                 }
 
                 const char c = line[i];
