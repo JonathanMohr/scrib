@@ -19,7 +19,7 @@ typedef enum Format
 
 static void printHelp(const char* name, std::ostream& out)
 {
-    out << "Usage: " << name << " [-h] [-v] <file> (-o <output) [flags]\n";
+    out << "Usage: " << name << " [-h] [-v] <file> (-o <output>) [flags]\n";
     out << "\nFlags:\n";
     out << "-h/--help               Show this message\n";
     out << "-v/--version            Show the version of this executable\n";
