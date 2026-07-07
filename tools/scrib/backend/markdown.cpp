@@ -32,33 +32,40 @@ void EscapeMarkdown(std::ostream& out, const TextLine& line, bool verySafe)
                 out << "&#x200B;";
             }
         }
-        lastSpecial = false;
-        space = false;
 
         bool boldStar = false;
         bool italicStar = false;
         if (text.bold)
         {
-            if (lastEndStar)
+            if (lastSpecial && lastEndStar)
+            {
                 out << "__";
+                lastEndStar = false;
+            }
             else
             {
                 out << "**";
                 boldStar = true;
+                lastEndStar = true;
             }
-            lastEndStar = !lastEndStar;
         }
         if (text.italic)
         {
-            if (lastEndStar)
+            if ((lastSpecial || text.bold) && lastEndStar)
+            {
                 out << "_";
+                lastEndStar = false;
+            }
             else
             {
                 out << "*";
                 italicStar = true;
+                lastEndStar = true;
             }
-            lastEndStar = !lastEndStar;
         }
+
+        lastSpecial = false;
+        space = false;
 
         for (std::size_t i = 0; i < content.size(); i++)
         {
