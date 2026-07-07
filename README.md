@@ -43,3 +43,26 @@ scoop install JonathanMohr/scrib # Or the name you chose
 # Or (if there are no conflicts)
 scoop install scrib
 ```
+
+### Build from source
+
+If you don't use Homebrew or Scoop, or just prefer to build manually, you will need the following tools available in your PATH:
+
+- Python 3.10+
+- clang, clang++
+- lld
+- llvm-ar
+- llvm-dsymutil or dsymutil (only required when targeting macOS)
+
+The `ci` module will build scrib and run a small set of tests.
+
+```sh
+# Clone and enter the repository
+git clone https://github.com/JonathanMohr/scrib
+cd scrib
+
+# Build
+python3 -m ci # use 'python' instead of 'python3' on Windows
+```
+
+After building, `./dist` will contain the install prefix (`/bin`, etc.). Copy its contents to a location of your choice (e.g. `~/.local/scrib`), then either add its directories to your `PATH` (and potentially `MANPATH`, etc.), or create symlinks into a directory that's already on it.
