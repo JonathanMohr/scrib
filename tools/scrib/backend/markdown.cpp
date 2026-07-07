@@ -2,10 +2,9 @@
 
 void EscapeMarkdown(std::ostream& out, const TextLine& line, bool verySafe)
 {
-    bool space = true;
-    bool lastSpecial = false;
-
+    bool lastEndSpecial = true;
     bool lastEndStar = false;
+    bool lastEndUnderscore = false;
 
     bool lineStart = true;
     for (std::size_t idx = 0; idx < line.content.size(); idx++)
@@ -23,49 +22,55 @@ void EscapeMarkdown(std::ostream& out, const TextLine& line, bool verySafe)
         std::string content = text.text.substr(startSpaceCount, text.text.size() -startSpaceCount - endSpaceCount);
 
         for (uint64_t i = 0; i < startSpaceCount; i++) out << ' ';
-        if (startSpaceCount > 0) space = true;
-
-        if (!space && lastSpecial && verySafe)
+        if (startSpaceCount > 0)
         {
-            if (text.bold || text.italic)
-            {
-                out << "&#x200B;";
-            }
+            lastEndStar = false;
+            lastEndUnderscore = false;
+        }
+
+        if (
+            (lastEndUnderscore && startSpaceCount == 0 && !text.bold && !text.italic) ||
+            (lastEndStar && verySafe && (text.bold || text.italic)) ||
+            (!lastEndSpecial && (text.bold || text.italic))
+        )
+        {
+            out << "&#x200B;";
         }
 
         bool boldStar = false;
         bool italicStar = false;
         if (text.bold)
         {
-            if (lastSpecial && lastEndStar)
+            if (lastEndStar)
             {
                 out << "__";
                 lastEndStar = false;
+                lastEndUnderscore = true;
             }
             else
             {
                 out << "**";
                 boldStar = true;
                 lastEndStar = true;
+                lastEndUnderscore = false;
             }
         }
         if (text.italic)
         {
-            if ((lastSpecial || text.bold) && lastEndStar)
+            if (lastEndStar)
             {
                 out << "_";
                 lastEndStar = false;
+                lastEndUnderscore = true;
             }
             else
             {
                 out << "*";
                 italicStar = true;
                 lastEndStar = true;
+                lastEndStar = false;
             }
         }
-
-        lastSpecial = false;
-        space = false;
 
         for (std::size_t i = 0; i < content.size(); i++)
         {
@@ -113,29 +118,41 @@ void EscapeMarkdown(std::ostream& out, const TextLine& line, bool verySafe)
                     out << c;
                     break;
             }
+
+            lastEndStar = false;
+            lastEndUnderscore = false;
+            lastEndSpecial = false;
         }
 
         if (text.italic)
         {
             lastEndStar = italicStar;
+            lastEndUnderscore = !italicStar;
             if (!italicStar)
                 out << "_";
             else
                 out << "*";
-            lastSpecial = true;
+            lastEndSpecial = true;
         }
         if (text.bold)
         {
             lastEndStar = boldStar;
+            lastEndUnderscore = !boldStar;
             if (!boldStar)
                 out << "__";
             else
                 out << "**";
-            lastSpecial = true;
+            lastEndSpecial = true;
         }
 
         for (uint64_t i = 0; i < endSpaceCount; i++) out << ' ';
-        if (endSpaceCount > 0) space = true;
+        if (endSpaceCount > 0)
+        {
+            lastEndStar = false;
+            lastEndUnderscore = false;
+
+            lastEndSpecial = true;
+        }
     }
 }
 
