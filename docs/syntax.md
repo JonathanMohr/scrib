@@ -8,12 +8,6 @@ Constants are case-sensitive.
 
 ## Definition
 
-You can define a constant by using the -C argument.
-
-```sh
-scrib test.scb -o out.md -CexampleName exampleValue
-```
-
 You can define a constant in the the code, using '%'.
 Everything after the first space until the end of the line will be used as value.
 
