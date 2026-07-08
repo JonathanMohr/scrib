@@ -65,18 +65,20 @@ void EscapeMarkdown(std::ostream& _out, const TextLine& line, bool verySafe)
     for (std::vector<Text>::size_type idx = 0; idx < line.content.size(); idx++)
     {
         const Text& text = line.content[idx];
-        
-        //char nextChar = '\0';
-        //if (idx + 1 < line.content.size() && !line.content[idx + 1].text.empty())
-        //{
-        //    const Text& next = line.content[idx + 1];
-        //    if (std::isspace(static_cast<unsigned char>(next.text[0])))
-        //        nextChar = ' ';
-        //    else if (next.bold)
-        //        nextChar = '*';
-        //    else if (next.italic)
-        //        nextChar = '*';
-        //}
+
+        unsigned char nextChar = '\0';
+        if (idx + 1 < line.content.size() && !line.content[idx + 1].text.empty())
+        {
+            const Text& next = line.content[idx + 1];
+            if (std::isspace(static_cast<unsigned char>(next.text[0])))
+                nextChar = ' ';
+            else if (next.bold)
+                nextChar = '*';
+            else if (next.italic)
+                nextChar = '*';
+            else
+                nextChar = static_cast<unsigned char>(next.text[0]);
+        }
 
         uint64_t startSpaceCount = 0;
         while (startSpaceCount < text.text.size() && std::isspace(static_cast<unsigned char>(text.text[startSpaceCount])))
@@ -93,10 +95,10 @@ void EscapeMarkdown(std::ostream& _out, const TextLine& line, bool verySafe)
         const bool special = (text.bold || text.italic);
         const bool multiSpecial = (text.bold && text.italic);
         if (
+            (out.getLast() == '*' && special && std::isalnum(nextChar)) ||
             (multiSpecial && std::isalnum(static_cast<unsigned char>(out.getLast()))) ||
             (out.getLast() == '*' && special && verySafe)
-        )
-            out << "&#x200B;";
+        ) out << "&#x200B;";
 
         bool boldStar = false;
         if (text.bold)
