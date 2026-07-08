@@ -1,15 +1,82 @@
 #include "markdown.hpp"
+#include <cstring>
+#include <ostream>
 
-void EscapeMarkdown(std::ostream& out, const TextLine& line, bool verySafe)
+class SmartOstream
 {
-    bool lastEndSpecial = true;
-    bool lastEndStar = false;
-    bool lastEndUnderscore = false;
+public:
+    SmartOstream(std::ostream& _os) : os(_os) {}
+
+    SmartOstream& operator<<(std::ostream& (*manip)(std::ostream&))
+    {
+        os << manip;
+        if (manip == static_cast<std::ostream&(*)(std::ostream&)>(std::endl))
+            last = '\n';
+        return *this;
+    }
+
+    SmartOstream& operator<<(char c)
+    {
+        last = c;
+        os << c;
+        return *this;
+    }
+
+    SmartOstream& operator<<(const char* str)
+    {
+        std::size_t len = std::strlen(str);
+        if (len > 0)
+            last = str[len - 1];
+        os << str;
+        return *this;
+    }
+
+    SmartOstream& operator<<(const std::string& str)
+    {
+        if (!str.empty())
+            last = str.back();
+        os << str;
+        return *this;
+    }
+
+    SmartOstream& operator<<(const std::string_view& str)
+    {
+        if (!str.empty())
+            last = str.back();
+        os << str;
+        return *this;
+    }
+
+    char getLast() const
+    {
+        return last;
+    }
+
+private:
+    std::ostream& os;
+    char last = '\0';
+};
+
+void EscapeMarkdown(std::ostream& _out, const TextLine& line, bool verySafe)
+{
+    SmartOstream out(_out);
 
     bool lineStart = true;
-    for (std::size_t idx = 0; idx < line.content.size(); idx++)
+    for (std::vector<Text>::size_type idx = 0; idx < line.content.size(); idx++)
     {
         const Text& text = line.content[idx];
+        
+        //char nextChar = '\0';
+        //if (idx + 1 < line.content.size() && !line.content[idx + 1].text.empty())
+        //{
+        //    const Text& next = line.content[idx + 1];
+        //    if (std::isspace(static_cast<unsigned char>(next.text[0])))
+        //        nextChar = ' ';
+        //    else if (next.bold)
+        //        nextChar = '*';
+        //    else if (next.italic)
+        //        nextChar = '*';
+        //}
 
         uint64_t startSpaceCount = 0;
         while (startSpaceCount < text.text.size() && std::isspace(static_cast<unsigned char>(text.text[startSpaceCount])))
@@ -22,57 +89,36 @@ void EscapeMarkdown(std::ostream& out, const TextLine& line, bool verySafe)
         std::string content = text.text.substr(startSpaceCount, text.text.size() -startSpaceCount - endSpaceCount);
 
         for (uint64_t i = 0; i < startSpaceCount; i++) out << ' ';
-        if (startSpaceCount > 0)
-        {
-            lastEndStar = false;
-            lastEndUnderscore = false;
-        }
 
+        const bool special = (text.bold || text.italic);
+        const bool multiSpecial = (text.bold && text.italic);
         if (
-            (lastEndUnderscore && startSpaceCount == 0 && !text.bold && !text.italic) ||
-            (lastEndStar && verySafe && (text.bold || text.italic)) ||
-            (!lastEndSpecial && (text.bold || text.italic))
+            (multiSpecial && std::isalnum(static_cast<unsigned char>(out.getLast()))) ||
+            (out.getLast() == '*' && special && verySafe)
         )
-        {
             out << "&#x200B;";
-        }
 
         bool boldStar = false;
-        bool italicStar = false;
         if (text.bold)
         {
-            if (lastEndStar)
-            {
-                out << "__";
-                lastEndStar = false;
-                lastEndUnderscore = true;
-            }
-            else
-            {
+            boldStar = (out.getLast() != '*');
+            if (boldStar)
                 out << "**";
-                boldStar = true;
-                lastEndStar = true;
-                lastEndUnderscore = false;
-            }
-        }
-        if (text.italic)
-        {
-            if (lastEndStar)
-            {
-                out << "_";
-                lastEndStar = false;
-                lastEndUnderscore = true;
-            }
             else
-            {
-                out << "*";
-                italicStar = true;
-                lastEndStar = true;
-                lastEndStar = false;
-            }
+                out << "__";
         }
 
-        for (std::size_t i = 0; i < content.size(); i++)
+        bool italicStar = false;
+        if (text.italic)
+        {
+            italicStar = (out.getLast() != '*');
+            if (italicStar)
+                out << '*';
+            else
+                out << '_';
+        }
+
+        for (std::string::size_type i = 0; i < content.size(); i++)
         {
             const char c = content[i];
 
@@ -118,41 +164,25 @@ void EscapeMarkdown(std::ostream& out, const TextLine& line, bool verySafe)
                     out << c;
                     break;
             }
-
-            lastEndStar = false;
-            lastEndUnderscore = false;
-            lastEndSpecial = false;
         }
 
         if (text.italic)
         {
-            lastEndStar = italicStar;
-            lastEndUnderscore = !italicStar;
-            if (!italicStar)
-                out << "_";
+            if (italicStar)
+                out << '*';
             else
-                out << "*";
-            lastEndSpecial = true;
+                out << '_';
         }
+
         if (text.bold)
         {
-            lastEndStar = boldStar;
-            lastEndUnderscore = !boldStar;
-            if (!boldStar)
-                out << "__";
-            else
+            if (boldStar)
                 out << "**";
-            lastEndSpecial = true;
+            else
+                out << "__";
         }
 
         for (uint64_t i = 0; i < endSpaceCount; i++) out << ' ';
-        if (endSpaceCount > 0)
-        {
-            lastEndStar = false;
-            lastEndUnderscore = false;
-
-            lastEndSpecial = true;
-        }
     }
 }
 
