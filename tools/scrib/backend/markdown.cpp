@@ -66,8 +66,20 @@ void EscapeMarkdown(std::ostream& _out, const TextLine& line, bool verySafe)
     {
         const Text& text = line.content[idx];
 
+        uint64_t startSpaceCount = 0;
+        while (startSpaceCount < text.text.size() && std::isspace(static_cast<unsigned char>(text.text[startSpaceCount])))
+            startSpaceCount++;
+
+        uint64_t endSpaceCount = 0;
+        while (endSpaceCount < text.text.size() && std::isspace(static_cast<unsigned char>(text.text[text.text.size() - 1 - endSpaceCount])))
+            endSpaceCount++;
+
+        std::string content = text.text.substr(startSpaceCount, text.text.size() -startSpaceCount - endSpaceCount);
+
         unsigned char nextChar = '\0';
-        if (idx + 1 < line.content.size() && !line.content[idx + 1].text.empty())
+        if (endSpaceCount > 0)
+            nextChar = ' ';
+        else if (idx + 1 < line.content.size() && !line.content[idx + 1].text.empty())
         {
             const Text& next = line.content[idx + 1];
             if (std::isspace(static_cast<unsigned char>(next.text[0])))
@@ -79,16 +91,6 @@ void EscapeMarkdown(std::ostream& _out, const TextLine& line, bool verySafe)
             else
                 nextChar = static_cast<unsigned char>(next.text[0]);
         }
-
-        uint64_t startSpaceCount = 0;
-        while (startSpaceCount < text.text.size() && std::isspace(static_cast<unsigned char>(text.text[startSpaceCount])))
-            startSpaceCount++;
-
-        uint64_t endSpaceCount = 0;
-        while (endSpaceCount < text.text.size() && std::isspace(static_cast<unsigned char>(text.text[text.text.size() - 1 - endSpaceCount])))
-            endSpaceCount++;
-
-        std::string content = text.text.substr(startSpaceCount, text.text.size() -startSpaceCount - endSpaceCount);
 
         for (uint64_t i = 0; i < startSpaceCount; i++) out << ' ';
 
