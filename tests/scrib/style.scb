@@ -2,28 +2,28 @@
 
 This is **bold**.
 
-This is _italic_.
+This is __italic__.
 
 This space is** bold**.
 
-This space is_ italic_.
+This space is__ italic__.
 
-This is **_both_**.
+This is **__both__**.
 
-**This _is_ nested**.
+**This __is__ nested**.
 
-_This **is** nested_.
+__This **is** nested__.
 
-This **is _not** easy_.
+This **is __not** easy__.
 
-This _is **complicated_ too**.
+This __is **complicated__ too**.
 
 This **does not close.
 But here it is normal again.
 
-This _does not close too.
+This __does not close too.
 But is normal as expected here.
 
-This_is_very_hard_.
+This__is__very__hard__.
 
-This**is**_fully**connected**_,so**no****spaces**_**just**here_oh_**nope**_
+This**is**__fully**connected**__,so**no****spaces**__**just**here__oh__**nope**__
