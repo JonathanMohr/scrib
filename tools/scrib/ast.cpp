@@ -106,6 +106,8 @@ Document ParseDocument(std::istream& input, Constants& constants)
                     }
 
                     current.text += '\\';
+                    if (i < line.size())
+                        current.text += line[i];
                 }
                 else if (c == '*')
                 {
@@ -182,6 +184,8 @@ Document ParseDocument(std::istream& input, Constants& constants)
                     }
                     
                     current.text += '\\';
+                    if (i < line.size())
+                        current.text += line[i];
                     continue;
                 }
 
