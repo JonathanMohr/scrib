@@ -109,19 +109,31 @@ Document ParseDocument(std::istream& input, Constants& constants)
                 }
                 else if (c == '*')
                 {
-                    if (current.text.size() > 0)
-                        textLine.content.push_back(current);
-                    current.text.clear();
+                    if (i + 1 < line.size() && line[i + 1] == '*')
+                    {
+                        if (current.text.size() > 0)
+                            textLine.content.push_back(current);
+                        current.text.clear();
 
-                    current.bold = !current.bold;
+                        current.bold = !current.bold;
+
+                        i++;
+                    }
+                    else current.text += '*';
                 }
                 else if (c == '_')
                 {
-                    if (current.text.size() > 0)
-                        textLine.content.push_back(current);
-                    current.text.clear();
+                    if (i + 1 < line.size() && line[i + 1] == '_')
+                    {
+                        if (current.text.size() > 0)
+                            textLine.content.push_back(current);
+                        current.text.clear();
 
-                    current.italic = !current.italic;
+                        current.italic = !current.italic;
+
+                        i++;
+                    }
+                    else current.text += '_';
                 }
                 else
                 {
@@ -177,19 +189,31 @@ Document ParseDocument(std::istream& input, Constants& constants)
                 
                 if (c == '*')
                 {
-                    if (current.text.size() > 0)
-                        textLine.content.push_back(current);
-                    current.text.clear();
+                    if (i + 1 < line.size() && line[i + 1] == '*')
+                    {
+                        if (current.text.size() > 0)
+                            textLine.content.push_back(current);
+                        current.text.clear();
 
-                    current.bold = !current.bold;
+                        current.bold = !current.bold;
+
+                        i++;
+                    }
+                    else current.text += '*';
                 }
                 else if (c == '_')
                 {
-                    if (current.text.size() > 0)
-                        textLine.content.push_back(current);
-                    current.text.clear();
+                    if (i + 1 < line.size() && line[i + 1] == '_')
+                    {
+                        if (current.text.size() > 0)
+                            textLine.content.push_back(current);
+                        current.text.clear();
 
-                    current.italic = !current.italic;
+                        current.italic = !current.italic;
+
+                        i++;
+                    }
+                    else current.text += '_';
                 }
                 else
                 {

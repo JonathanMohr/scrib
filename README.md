@@ -78,15 +78,15 @@ You can create `input.scb` (Or any other name):
 
 ## Very important category
 
-This content is very *important*.
+This content is very **important**.
 
 ## Less important category
 
-This content is much _less important_ than before.
+This content is much __less important__ than before.
 
 ## Confidential category
 
-This content is extremely *important* and *_confidential_*.
+This content is extremely **important** and **__confidential__**.
 ```
 
 Then you can compile it to Markdown using the following command:
@@ -97,7 +97,7 @@ scrib input.scb -o output.md -f markdown
 
 Then you will get the output that will look similar to this:
 
-```md
+```markdown
 # Interesting header
 
 ## Very important category
@@ -110,7 +110,7 @@ This content is much *less important* than before.
 
 ## Confidential category
 
-This content is extremely **important** and __*confidential*__.
+This content is extremely **important** and **_confidential_**.
 ```
 
 - [CLI reference](docs/cli.md) - all available flags and options.

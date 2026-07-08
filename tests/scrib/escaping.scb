@@ -1,8 +1,8 @@
 # Escaping
 
-This would be \*bold\*.
+This would be \*\*bold\*\*.
 
-This would be \_italic\_.
+This would be \_\_italic\_\_.
 
 \%This would define a constant.
 

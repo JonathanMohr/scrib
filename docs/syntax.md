@@ -37,8 +37,8 @@ Leading spaces will be ignored
 
 The styles are fully independent of eachother.
 
-- Bold: Put text between '*'
-- Italic: Put text between '_'
+- Bold: Put text between '**'
+- Italic: Put text between '__'
 
 # Escaping
 

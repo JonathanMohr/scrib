@@ -1,24 +1,24 @@
 # Style
 
-This is *bold*.
+This is **bold**.
 
 This is _italic_.
 
-This space is* bold*.
+This space is** bold**.
 
 This space is_ italic_.
 
-This is *_both_*.
+This is **_both_**.
 
-*This _is_ nested*.
+**This _is_ nested**.
 
-_This *is* nested_.
+_This **is** nested_.
 
-This *is _not* easy_.
+This **is _not** easy_.
 
-This _is *complicated_ too*.
+This _is **complicated_ too**.
 
-This *does not close.
+This **does not close.
 But here it is normal again.
 
 This _does not close too.
@@ -26,4 +26,4 @@ But is normal as expected here.
 
 This_is_very_hard_.
 
-This*is*_fully*connected*_,so*no**spaces*_*just*here_oh_*nope*_
+This**is**_fully**connected**_,so**no****spaces**_**just**here_oh_**nope**_
