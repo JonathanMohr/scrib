@@ -2,9 +2,12 @@
 #include "ast.hpp"
 
 #include <ctime>
+#include <optional>
 #include <ostream>
 #include <sstream>
 #include <iomanip>
+#include <variant>
+#include <vector>
 
 void Escape(std::ostream& out, const TextParagraph& line)
 {
@@ -160,9 +163,12 @@ void GenerateManTroff(std::ostream& out, const Document& document, const Constan
 
     out << "\n\n";
 
-    for (const Node& node : document.nodes)
+    for (std::vector<Node>::size_type i = 0; i < document.nodes.size(); i++)
     {
-        std::visit([&out](const auto& n)
+        const Node& node = document.nodes[i];
+        const Node* next = ((i + 1) < document.nodes.size()) ? &document.nodes[i + 1] : nullptr;
+
+        std::visit([&out, &next](const auto& n)
         {
             using T = std::decay_t<decltype(n)>;
 
@@ -171,12 +177,14 @@ void GenerateManTroff(std::ostream& out, const Document& document, const Constan
                 if (n.subheading) out << ".SS ";
                 else              out << ".SH ";
                 Escape(out, n.text);
-                out << "\n\n"; 
+                out << "\n"; 
             }
             else if constexpr (std::is_same_v<T, TextParagraph>)
             {
                 Escape(out, n);
-                out << "\n\n";
+                out << '\n';
+                if (next && std::holds_alternative<TextParagraph>((*next).data))
+                    out << ".PP\n";
             }
         }, node.data);
     }
