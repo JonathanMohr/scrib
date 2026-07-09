@@ -1,4 +1,5 @@
 #include "markdown.hpp"
+#include "ast.hpp"
 #include <cstring>
 #include <ostream>
 
@@ -57,7 +58,7 @@ private:
     char last = '\0';
 };
 
-void EscapeMarkdown(std::ostream& _out, const TextLine& line, bool verySafe)
+void EscapeMarkdown(std::ostream& _out, const TextParagraph& line, bool verySafe)
 {
     SmartOstream out(_out);
 
@@ -205,16 +206,12 @@ void GenerateMarkdown(std::ostream& out, const Document& document, const Constan
                 if (n.subheading) out << '#';
                 out << "# ";
                 EscapeMarkdown(out, n.text, verySafe);
-                out << '\n'; 
+                out << "\n\n"; 
             }
-            else if constexpr (std::is_same_v<T, TextLine>)
+            else if constexpr (std::is_same_v<T, TextParagraph>)
             {
                 EscapeMarkdown(out, n, verySafe);
-                out << '\n';
-            }
-            else if constexpr (std::is_same_v<T, EmptyLine>)
-            {
-                out << '\n';
+                out << "\n\n";
             }
         }, node.data);
     }

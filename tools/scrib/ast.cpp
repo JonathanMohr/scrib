@@ -28,6 +28,35 @@ const std::string* Constants::get(const char* name) const
     return &values[index];
 }
 
+static bool parseEscaped(std::size_t& i, std::string& line, Text& current)
+{
+    if (line[i] == '\\')
+    {
+        i++;
+        if (i < line.size())
+        {
+            switch (line[i])
+            {
+                case '%': case '#':
+                case '*': case '_':
+                case '-': case '\\':
+                    current.text += line[i];
+                    return true;
+
+                default:
+                    current.text += '\\';
+                    current.text += line[i];
+            }
+        }
+        else
+            current.text += '\\';
+
+        return true;
+    }
+
+    return false;
+}
+
 Document ParseDocument(std::istream& input, Constants& constants)
 {
     (void)constants;
@@ -36,7 +65,7 @@ Document ParseDocument(std::istream& input, Constants& constants)
 
     std::string raw;
 
-    TextLine textLine;
+    TextParagraph textLine;
     Text current;
 
     while (std::getline(input, raw))
@@ -48,9 +77,22 @@ Document ParseDocument(std::istream& input, Constants& constants)
         std::string line = raw.substr(spaceCount);
         if (line.empty())
         {
-            doc.nodes.push_back(Node{EmptyLine{}});
-            continue;
+            if (textLine.content.size() > 0)
+            {
+                bool valid = false;
+                for (const Text& text : textLine.content)
+                {
+                    if (text.text.size() > 0) valid = true;
+                }
+
+                if (valid)
+                    doc.nodes.push_back(Node{textLine});
+            }
+
+            textLine.content.clear();
         }
+        else if (!textLine.content.empty())
+            textLine.content.push_back(Text{false, false, " "});
 
         // Constant
         if (line[0] == '%')
@@ -74,7 +116,6 @@ Document ParseDocument(std::istream& input, Constants& constants)
             continue;
         }
 
-        textLine.content.clear();
         current.text.clear();
         current.bold = false;
         current.italic = false;
@@ -91,24 +132,8 @@ Document ParseDocument(std::istream& input, Constants& constants)
             {
                 const char c = line[i];
 
-                if (c == '\\')
-                {
-                    i++;
-                    if (i < line.size())
-                    {
-                        if (line[i] == '#' || line[i] == '*' ||
-                            line[i] == '_' || line[i] == '-' ||
-                            line[i] == '\\' || line[i] == '%')
-                        {
-                            current.text += line[i];
-                            continue;
-                        }
-                    }
-
-                    current.text += '\\';
-                    if (i < line.size())
-                        current.text += line[i];
-                }
+                if (parseEscaped(i, line, current))
+                    continue;
                 else if (c == '*')
                 {
                     if (i + 1 < line.size() && line[i + 1] == '*')
@@ -164,30 +189,14 @@ Document ParseDocument(std::istream& input, Constants& constants)
                 Heading heading{textLine, false};
                 doc.nodes.push_back(Node{std::move(heading)});
             }
+            textLine.content.clear();
         }
         else
         {
             for (std::size_t i = 0; i < line.size(); i++)
             {
-                if (line[i] == '\\')
-                {
-                    i++;
-                    if (i < line.size())
-                    {
-                        if (line[i] == '#' || line[i] == '*' ||
-                            line[i] == '_' || line[i] == '-' ||
-                            line[i] == '\\' || line[i] == '%')
-                        {
-                            current.text += line[i];
-                            continue;
-                        }
-                    }
-                    
-                    current.text += '\\';
-                    if (i < line.size())
-                        current.text += line[i];
+                if (parseEscaped(i, line, current))
                     continue;
-                }
 
                 const char c = line[i];
                 
@@ -235,22 +244,22 @@ Document ParseDocument(std::istream& input, Constants& constants)
                 if (current.text.size() > 0)
                     textLine.content.push_back(current);
             }
-
-            if (textLine.content.size() > 0)
-            {
-                bool valid = false;
-                for (const Text& text : textLine.content)
-                {
-                    if (text.text.size() > 0) valid = true;
-                }
-
-                if (valid)
-                    doc.nodes.push_back(Node{textLine});
-            }
-            else
-                doc.nodes.push_back(Node{EmptyLine{}});
         }
     }
+
+    if (textLine.content.size() > 0)
+    {
+        bool valid = false;
+        for (const Text& text : textLine.content)
+        {
+            if (text.text.size() > 0) valid = true;
+        }
+
+        if (valid)
+            doc.nodes.push_back(Node{textLine});
+    }
+
+    textLine.content.clear();
 
     return doc;
 }

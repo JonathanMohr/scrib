@@ -15,25 +15,20 @@ struct Text
     std::string text;
 };
 
-struct TextLine
+struct TextParagraph
 {
     std::vector<Text> content;
 };
 
-struct EmptyLine
-{
-    char buffer;
-};
-
 struct Heading
 {
-    TextLine text;
+    TextParagraph text;
     bool subheading;
 };
 
 struct Node
 {
-    std::variant<Heading, TextLine, EmptyLine> data;
+    std::variant<Heading, TextParagraph> data;
 };
 
 struct Document

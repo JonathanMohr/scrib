@@ -11,3 +11,6 @@ This would be \_\_italic\_\_.
 \- This would be a list (when the feature is implemented...).
 
 \\ This is the escape sign!
+
+Those are invalid
+\a \b \c \/_\/

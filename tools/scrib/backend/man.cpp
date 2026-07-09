@@ -6,7 +6,7 @@
 #include <sstream>
 #include <iomanip>
 
-void Escape(std::ostream& out, const TextLine& line)
+void Escape(std::ostream& out, const TextParagraph& line)
 {
     bool regular = true;
 
@@ -171,16 +171,12 @@ void GenerateManTroff(std::ostream& out, const Document& document, const Constan
                 if (n.subheading) out << ".SS ";
                 else              out << ".SH ";
                 Escape(out, n.text);
-                out << '\n'; 
+                out << "\n\n"; 
             }
-            else if constexpr (std::is_same_v<T, TextLine>)
+            else if constexpr (std::is_same_v<T, TextParagraph>)
             {
                 Escape(out, n);
-                out << '\n';
-            }
-            else if constexpr (std::is_same_v<T, EmptyLine>)
-            {
-                out << '\n';
+                out << "\n\n";
             }
         }, node.data);
     }
