@@ -365,6 +365,8 @@ def main() -> bool:
         help="Name of the archive to create"
     )
 
+    
+
     args = argparser.parse_args()
 
     logger = logging.getLogger("ci")
